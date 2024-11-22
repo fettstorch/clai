@@ -35,6 +35,8 @@ clai
 ```
 <img width="300" src="https://github.com/user-attachments/assets/f4a81e24-ef5b-42b7-bca7-188763d4e5cf" />
 
+The clie expects either a URL or a search query or no argument at all.
+When passing a search query without quotes make sure not to use any special characters, that might confuse the CLI e.g. ?
 
 ### Programmatic API
 ```ts
@@ -42,6 +44,10 @@ import clai from 'clai';
 
 const { summary, links, sources } = await clai('https://example.com', 'your-openai-api-key');
 ```
+
+## Issues
+- Needs a better prompt in order to more reliably stop narrating a page's content and rather cite it in a more concise manner.
+- The first answer's stream animation appears to sometimes not be skippable using 'enter'
 
 ## License
 
