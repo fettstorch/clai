@@ -3,14 +3,14 @@ import { Command } from 'commander';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 import ora from 'ora';
-import { skaim } from './index';
+import { clai } from './index';
 
 const program = new Command();
 
 async function main() {
   try {
     program
-      .name('skaim')
+      .name('clai')
       .description('AI-powered web scraping tool')
       .version('1.0.0')
       .argument('[input...]', 'URL or search terms to analyze')
@@ -91,7 +91,7 @@ async function analyzeInput(input: string, openAIKey: string) {
   const spinner = ora('Analyzing content...').start();
   
   try {
-    const result = await skaim(input, openAIKey);
+    const result = await clai(input, openAIKey);
     spinner.succeed('Analysis complete');
     
     console.log(chalk.green.bold('\n📝 Summary:'));

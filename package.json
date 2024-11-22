@@ -1,9 +1,9 @@
 {
-  "name": "skaim",
+  "name": "clai",
   "version": "1.0.0",
   "main": "dist/index.js",
   "bin": {
-    "skaim": "./dist/cli.js"
+    "clai": "./dist/cli.js"
   },
   "scripts": {
     "start": "bun run src/cli.ts",

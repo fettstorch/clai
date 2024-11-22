@@ -18,13 +18,13 @@ export interface SummaryOutput {
  * 
  * @example
  * ```ts
- * const result = await skaim('https://example.com', 'your-openai-key')
+ * const result = await clai('https://example.com', 'your-openai-key')
  * console.log(result.summary) // AI generated summary
  * console.log(result.links) // Extracted links
  * console.log(result.sources) // Source URLs
  * ```
  */
-export async function skaim(input: string, openAIKey: string): Promise<SummaryOutput> {
+export async function clai(input: string, openAIKey: string): Promise<SummaryOutput> {
   const scrapedData = await scrape(input);
   
   // Combine all content with source attribution
@@ -42,4 +42,4 @@ export async function skaim(input: string, openAIKey: string): Promise<SummaryOu
 }
 
 // Default export for easier importing
-export default skaim; 
+export default clai; 
