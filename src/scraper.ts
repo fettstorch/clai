@@ -3,20 +3,35 @@ import * as Cheerio from 'cheerio';
 export interface ScrapedData {
   title: string;
   content: string;
+  url: string;
 }
 
-export async function scrape(input: string): Promise<ScrapedData> {
+export async function scrape(input: string): Promise<ScrapedData[]> {
   try {
-    let url: string;
+    let urls: string[];
     
     if (isValidUrl(input)) {
-      url = normalizeUrl(input);
+      urls = [normalizeUrl(input)];
     } else {
-      url = await getGoogleFirstResult(input);
+      urls = await getGoogleResults(input);
     }
 
-    const html = await fetchHtml(url);
-    return extractDataFromHtml(html);
+    // Fetch all URLs in parallel
+    const results = await Promise.all(
+      urls.map(async (url) => {
+        try {
+          const html = await fetchHtml(url);
+          const data = extractDataFromHtml(html);
+          return { ...data, url };
+        } catch (error) {
+          console.error(`Error scraping ${url}:`, error);
+          return null;
+        }
+      })
+    );
+
+    // Filter out failed scrapes
+    return results.filter((result): result is ScrapedData => result !== null);
   } catch (error) {
     console.error('Error during scraping:', error);
     throw error;
@@ -36,27 +51,18 @@ function normalizeUrl(url: string): string {
   return url;
 }
 
-async function getGoogleFirstResult(query: string): Promise<string> {
+async function getGoogleResults(query: string): Promise<string[]> {
   const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
   const html = await fetchHtml(searchUrl);
   
-  // URL regex pattern
   const urlPattern = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
-  
-  // Find all URLs in the HTML
   const urls = html.match(urlPattern) || [];
-
-  console.debug('urls: ', urls);
   
-  // Split query into words, normalize them, and filter out short words
   const queryWords = query
     .toLowerCase()
     .split(/\s+/)
     .filter(word => word.length > 2);
-
-  console.debug('queryWords: ', queryWords);
   
-  // Filter URLs and remove duplicates using Set
   const filteredUrls = new Set(
     urls.filter(url => {
       const urlLower = url.toLowerCase();
@@ -68,15 +74,13 @@ async function getGoogleFirstResult(query: string): Promise<string> {
     })
   );
 
-  console.debug('filteredUrls: ', [...filteredUrls]);
-
-  const firstResult = [...filteredUrls][0];
+  const results = [...filteredUrls].slice(0, 3);
   
-  if (!firstResult) {
+  if (results.length === 0) {
     throw new Error('No search results found');
   }
   
-  return firstResult;
+  return results;
 }
 
 async function fetchHtml(url: string): Promise<string> {
@@ -92,6 +96,7 @@ function extractDataFromHtml(html: string): ScrapedData {
   const cheerioDoc = Cheerio.load(html);
   return {
     title: cheerioDoc('title').text(),
-    content: cheerioDoc('body').text()
+    content: cheerioDoc('body').text(),
+    url: cheerioDoc('link[rel="canonical"]').attr('href') || ''
   };
 }

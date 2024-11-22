@@ -7,46 +7,6 @@ import { skaim } from './index';
 
 const program = new Command();
 
-async function analyzeInput(input: string, openAIKey: string) {
-  const spinner = ora('Analyzing...').start();
-  try {
-    const result = await skaim(input, openAIKey);
-    spinner.succeed('Analysis complete');
-    
-    console.log(chalk.green('\n📝 Summary:'));
-    console.log(result.summary);
-    
-    console.log(chalk.yellow('\n🔗 Extracted Links:'));
-    result.links.forEach(link => {
-      console.log(`${chalk.bold('•')} ${chalk.cyan(link.name)}: ${link.url}`);
-    });
-
-    // Prompt user to select a link
-    const { selectedLink } = await inquirer.prompt([
-      {
-        type: 'list',
-        name: 'selectedLink',
-        message: 'Select a link to analyze (or press Ctrl+C to exit):',
-        choices: [
-          ...result.links.map(link => ({
-            name: `${link.name}: ${link.url}`,
-            value: link.url
-          })),
-          { name: 'Exit', value: 'exit' }
-        ]
-      }
-    ]);
-
-    if (selectedLink && selectedLink !== 'exit') {
-      await analyzeInput(selectedLink, openAIKey);
-    }
-
-  } catch (error) {
-    spinner?.fail('Analysis failed');
-    console.error(chalk.red('Error:'), error);
-  }
-}
-
 async function main() {
   try {
     program
@@ -84,6 +44,42 @@ async function main() {
   } catch (error) {
     console.error(chalk.red('Fatal error:'), error);
     process.exit(1);
+  }
+}
+
+async function analyzeInput(input: string, openAIKey: string) {
+  const spinner = ora('Analyzing content...').start();
+  
+  try {
+    const result = await skaim(input, openAIKey);
+    spinner.succeed('Analysis complete');
+    
+    console.log(chalk.green('\n📝 Summary:'));
+    console.log(result.summary);
+    
+    // Prompt user to select a link
+    const { selectedLink } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'selectedLink',
+        message: 'Select a link to analyze:',
+        choices: [
+          ...result.links.map(link => ({
+            name: `${link.name}: ${link.url}`,
+            value: link.url
+          })),
+          { name: 'Exit', value: 'exit' }
+        ]
+      }
+    ]);
+
+    if (selectedLink && selectedLink !== 'exit') {
+      await analyzeInput(selectedLink, openAIKey);
+    }
+
+  } catch (error) {
+    spinner?.fail('Analysis failed');
+    console.error(chalk.red('Error:'), error);
   }
 }
 

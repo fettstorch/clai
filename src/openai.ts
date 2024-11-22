@@ -30,7 +30,7 @@ class OpenAIWrapper {
     } = {}
   ): Promise<string> {
     const truncatedPrompt = truncateContent(prompt);
-    const { model = 'gpt-3.5-turbo', temperature = 0.6 } = options;
+    const { model = 'gpt-4o-turbo', temperature = 0.6 } = options;
 
     const response = await this.client.chat.completions.create({
       model,

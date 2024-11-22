@@ -23,14 +23,20 @@ export type SummaryResult = Readonly<{
  * ```
  */
 
-export async function summarizeWebPage(content: string, maxLength: number, openAIApiKey: string): Promise<SummaryResult> {
+export async function summarizeWebPage(content: string, openAIApiKey: string): Promise<SummaryResult> {
   const openai = openaiClient(openAIApiKey);
   
-  const prompt = `Analyze the following text and create:
-    1. A concise summary in ${maxLength} words or less. Prefer bullet points, lists and tables over paragraphs. Produce valid markdown output. Aggregate contents thematically. Use the articles titles and headings as a guide.
-    2. Extract all meaningful links from the text
-    
-    Text to analyze:\n${content}`;
+  const prompt = `Your are an expert educator. Analyze the following text and create a
+  concise summary with the following guidelines:
+   1. Prefer bullet points, lists and tables over paragraphs.
+   2. Produce valid markdown output
+   3. Use the articles titles and headings as a guide
+   4. Try to present the most relevant information
+   5. Extract all meaningful links from the text
+  
+  Don't just summarize, cite the key information.
+  
+  Text to analyze:\n${content}`;
 
   const schema = {
     textual: {
