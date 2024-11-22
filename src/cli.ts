@@ -2,9 +2,8 @@
 import { skaim } from './index';
 
 async function main() {
-  const url = process.argv[2];
+  let url = process.argv[2];
   const openAIKey = process.env.OPENAI_API_KEY;
-  console.debug('openai key', openAIKey)
 
   if (!url) {
     console.error('Please provide a URL as an argument');
@@ -17,8 +16,7 @@ async function main() {
   }
 
   if (!url.startsWith('https://')) {
-    console.error('URL must start with https://');
-    process.exit(1);
+    url = `https://${url}`;
   }
 
   try {
