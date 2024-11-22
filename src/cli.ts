@@ -47,6 +47,46 @@ async function main() {
   }
 }
 
+async function animateText(text: string, delay = 25) {
+  let shouldComplete = false;
+  
+  // Setup keypress listener
+  const keypressHandler = (str: string, key: { name: string }) => {
+    if (key.name === 'return') {
+      shouldComplete = true;
+    }
+  };
+  
+  process.stdin.on('keypress', keypressHandler);
+  
+  // Enable raw mode to get keypress events
+  process.stdin.setRawMode(true);
+  process.stdin.resume();
+  
+  let currentIndex = 0;
+  while (currentIndex < text.length) {
+    if (shouldComplete) {
+      // Show remaining text immediately
+      process.stdout.write(text.slice(currentIndex));
+      break;
+    }
+    
+    process.stdout.write(text[currentIndex]);
+    currentIndex++;
+    
+    if (!shouldComplete) {
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  // Cleanup
+  process.stdin.setRawMode(false);
+  process.stdin.pause();
+  process.stdin.removeListener('keypress', keypressHandler);
+  
+  process.stdout.write('\n');
+}
+
 async function analyzeInput(input: string, openAIKey: string) {
   const spinner = ora('Analyzing content...').start();
   
@@ -55,14 +95,14 @@ async function analyzeInput(input: string, openAIKey: string) {
     spinner.succeed('Analysis complete');
     
     console.log(chalk.green.bold('\n📝 Summary:'));
-    console.log(result.summary);
+    await animateText(result.summary);
     
     // Prompt user to select a link
     const { selectedLink } = await inquirer.prompt([
       {
         type: 'list',
         name: 'selectedLink',
-        message: '\n\nSelect a link to analyze:',
+        message: '\n\nWhat now?:',
         choices: [
           { name: chalk.yellow('🔍 New search'), value: 'new' },
           ...result.links.map(link => ({
