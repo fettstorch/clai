@@ -64,6 +64,7 @@ async function analyzeInput(input: string, openAIKey: string) {
         name: 'selectedLink',
         message: '\n\nSelect a link to analyze:',
         choices: [
+          { name: chalk.yellow('🔍 New search'), value: 'new' },
           ...result.links.map(link => ({
             name: `${chalk.bold(link.name)}: ${chalk.cyan(link.url)}`,
             value: link.url
@@ -73,7 +74,17 @@ async function analyzeInput(input: string, openAIKey: string) {
       }
     ]);
 
-    if (selectedLink && selectedLink !== 'exit') {
+    if (selectedLink === 'new') {
+      const { input: newInput } = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'input',
+          message: 'Enter a URL or search query:',
+          validate: (input) => input.length > 0
+        }
+      ]);
+      await analyzeInput(newInput, openAIKey);
+    } else if (selectedLink && selectedLink !== 'exit') {
       await analyzeInput(selectedLink, openAIKey);
     }
 
