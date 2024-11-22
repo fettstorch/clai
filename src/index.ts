@@ -1,4 +1,4 @@
-import { scrape, ScrapedData } from './scraper';
+import { scrape } from './scraper';
 import { summarizeWebPage as summarize } from './summarizer';
 
 export interface SummaryOutput {
