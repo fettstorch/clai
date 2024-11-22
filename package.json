@@ -1,0 +1,22 @@
+{
+  "name": "scrapertest",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "bun run src/main.ts",
+    "build": "bun build src/main.ts --outdir dist",
+    "dev": "bun --watch src/main.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@fettstorch/jule": "^0.5.3",
+    "cheerio": "^1.0.0-rc.12",
+    "openai": "^4.73.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "bun-types": "latest"
+  }
+}
