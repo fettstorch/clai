@@ -24,7 +24,7 @@ export interface SummaryOutput {
  */
 export async function skaim(url: `https://${string}`, openAIKey: string): Promise<SummaryOutput> {
   const data = await scrape(url);
-  const result = await summarizeWebPage(data.content, 200, openAIKey);
+  const result = await summarizeWebPage(data.content, 400, openAIKey);
   
   return {
     summary: result.textual.trim(),
