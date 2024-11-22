@@ -20,7 +20,8 @@
     "commander": "^12.1.0",
     "inquirer": "^12.1.0",
     "openai": "^4.73.0",
-    "ora": "^8.1.1"
+    "ora": "^8.1.1",
+    "googleapis": "^126.0.1"
   },
   "devDependencies": {
     "@types/inquirer": "^9.0.7",

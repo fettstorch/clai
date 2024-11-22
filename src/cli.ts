@@ -7,10 +7,10 @@ import { skaim } from './index';
 
 const program = new Command();
 
-async function analyzeUrl(url: string, openAIKey: string) {
-  const spinner = ora('Analyzing URL...').start();
+async function analyzeInput(input: string, openAIKey: string) {
+  const spinner = ora('Analyzing...').start();
   try {
-    const result = await skaim(url as `https://${string}`, openAIKey);
+    const result = await skaim(input, openAIKey);
     spinner.succeed('Analysis complete');
     
     console.log(chalk.green('\n📝 Summary:'));
@@ -38,7 +38,7 @@ async function analyzeUrl(url: string, openAIKey: string) {
     ]);
 
     if (selectedLink && selectedLink !== 'exit') {
-      await analyzeUrl(selectedLink, openAIKey);
+      await analyzeInput(selectedLink, openAIKey);
     }
 
   } catch (error) {
@@ -68,7 +68,7 @@ async function main() {
             {
               type: 'input',
               name: 'url',
-              message: 'Enter the URL to analyze:',
+              message: 'Enter a URL or search query (google):',
               default: url,
               validate: (input) => input.length > 0
             }
@@ -76,11 +76,7 @@ async function main() {
           url = answers.url;
         }
 
-        if (!url.startsWith('https://')) {
-          url = `https://${url}`;
-        }
-
-        await analyzeUrl(url, openAIKey);
+        await analyzeInput(url, openAIKey);
         process.exit(0);
       });
 

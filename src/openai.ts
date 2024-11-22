@@ -1,6 +1,14 @@
 import { once } from '@fettstorch/jule';
 import OpenAI from 'openai';
 
+const MAX_INPUT_TOKENS = 10000;
+
+function truncateContent(content: string): string {
+  const maxChars = MAX_INPUT_TOKENS * 4;
+  if (content.length <= maxChars) return content;
+  return content.slice(0, maxChars) + '... (content truncated)';
+}
+
 export interface StructuredResponse<T> {
   function_call: {
     arguments: string;
@@ -14,9 +22,6 @@ class OpenAIWrapper {
     this.client = new OpenAI({ apiKey });
   }
 
-  /**
-   * Generates a simple text completion using GPT model
-   */
   async complete(
     prompt: string,
     options: {
@@ -24,20 +29,19 @@ class OpenAIWrapper {
       temperature?: number;
     } = {}
   ): Promise<string> {
+    const truncatedPrompt = truncateContent(prompt);
     const { model = 'gpt-3.5-turbo', temperature = 0.6 } = options;
 
     const response = await this.client.chat.completions.create({
       model,
-      messages: [{ role: 'user', content: prompt }],
-      temperature
+      messages: [{ role: 'user', content: truncatedPrompt }],
+      temperature,
+      max_tokens: 2000
     });
 
     return response.choices[0]?.message?.content ?? '';
   }
 
-  /**
-   * Generates a structured completion using GPT model
-   */
   async completeStructured<T>(
     prompt: string,
     options: {
@@ -47,6 +51,7 @@ class OpenAIWrapper {
       responseSchema: Record<string, unknown>;
     }
   ): Promise<T> {
+    const truncatedPrompt = truncateContent(prompt);
     const { 
       model = 'gpt-3.5-turbo', 
       temperature = 0.6,
@@ -56,8 +61,9 @@ class OpenAIWrapper {
 
     const response = await this.client.chat.completions.create({
       model,
-      messages: [{ role: 'user', content: prompt }],
+      messages: [{ role: 'user', content: truncatedPrompt }],
       temperature,
+      max_tokens: 2000,
       functions: [{
         name: functionName,
         parameters: {

@@ -1,5 +1,5 @@
 import { scrape } from './scraper';
-import { summarizeWebPage } from './summarizer';
+import { summarizeWebPage as summarize } from './summarizer';
 
 export interface SummaryOutput {
   summary: string;
@@ -11,7 +11,7 @@ export interface SummaryOutput {
 
 /**
  * Scrapes and analyzes a webpage using AI
- * @param url - The HTTPS URL to analyze
+ * @param input - The HTTPS URL to analyze
  * @param openAIKey - OpenAI API key
  * @returns Promise with summary and extracted links
  * 
@@ -22,9 +22,9 @@ export interface SummaryOutput {
  * console.log(result.links) // Extracted links
  * ```
  */
-export async function skaim(url: `https://${string}`, openAIKey: string): Promise<SummaryOutput> {
-  const data = await scrape(url);
-  const result = await summarizeWebPage(data.content, 400, openAIKey);
+export async function skaim(input: string, openAIKey: string): Promise<SummaryOutput> {
+  const data = await scrape(input);
+  const result = await summarize(data.content, 400, openAIKey);
   
   return {
     summary: result.textual.trim(),
