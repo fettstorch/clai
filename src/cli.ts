@@ -13,9 +13,8 @@ async function main() {
       .name('skaim')
       .description('AI-powered web scraping tool')
       .version('1.0.0')
-      .argument('[url]', 'URL to analyze')
-      .option('-i, --interactive', 'Run in interactive mode')
-      .action(async (url: string, options) => {
+      .argument('[input...]', 'URL or search terms to analyze')
+      .action(async (inputs: string[]) => {
         const openAIKey = process.env.OPENAI_API_KEY;
         
         if (!openAIKey) {
@@ -23,20 +22,21 @@ async function main() {
           process.exit(1);
         }
 
-        if (options.interactive || !url) {
+        let input = inputs?.join(' ');
+        
+        if (!input) {
           const answers = await inquirer.prompt([
             {
               type: 'input',
-              name: 'url',
-              message: 'Enter a URL or search query (google):',
-              default: url,
+              name: 'input',
+              message: 'Enter a URL or search query:',
               validate: (input) => input.length > 0
             }
           ]);
-          url = answers.url;
+          input = answers.input;
         }
 
-        await analyzeInput(url, openAIKey);
+        await analyzeInput(input, openAIKey);
         process.exit(0);
       });
 
@@ -54,7 +54,7 @@ async function analyzeInput(input: string, openAIKey: string) {
     const result = await skaim(input, openAIKey);
     spinner.succeed('Analysis complete');
     
-    console.log(chalk.green('\n📝 Summary:'));
+    console.log(chalk.green.bold('\n📝 Summary:'));
     console.log(result.summary);
     
     // Prompt user to select a link
@@ -62,10 +62,10 @@ async function analyzeInput(input: string, openAIKey: string) {
       {
         type: 'list',
         name: 'selectedLink',
-        message: 'Select a link to analyze:',
+        message: '\n\nSelect a link to analyze:',
         choices: [
           ...result.links.map(link => ({
-            name: `${link.name}: ${link.url}`,
+            name: `${link.name}: ${chalk.cyan(link.url)}`,
             value: link.url
           })),
           { name: 'Exit', value: 'exit' }
