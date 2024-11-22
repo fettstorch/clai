@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "main": "dist/index.js",
   "bin": {
-    "clai": "./dist/cli.js"
+    "clai": "dist/cli.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/schnullerpip/clai.git"
+    "url": "git+https://github.com/schnullerpip/clai.git"
   },
   "scripts": {
     "start": "bun run src/cli.ts",
