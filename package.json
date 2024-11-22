@@ -1,5 +1,5 @@
 {
-  "name": "clai",
+  "name": "@fettstorch/clai",
   "version": "0.1.0",
   "main": "dist/index.js",
   "bin": {
@@ -31,5 +31,8 @@
     "@types/inquirer": "^9.0.7",
     "@types/node": "^20.11.19",
     "bun-types": "latest"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
