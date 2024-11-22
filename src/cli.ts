@@ -65,7 +65,7 @@ async function analyzeInput(input: string, openAIKey: string) {
         message: '\n\nSelect a link to analyze:',
         choices: [
           ...result.links.map(link => ({
-            name: `${link.name}: ${chalk.cyan(link.url)}`,
+            name: `${chalk.bold(link.name)}: ${chalk.cyan(link.url)}`,
             value: link.url
           })),
           { name: 'Exit', value: 'exit' }
