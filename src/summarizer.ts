@@ -28,15 +28,23 @@ export async function summarizeWebPage(content: string, openAIApiKey: string): P
   
   const prompt = `Your are an expert educator. Analyze the following text and create a
   concise summary with the following guidelines:
-   1. Prefer bullet points, lists and tables over paragraphs.
+   1. Always use bullet points, lists and tables over paragraphs.
    2. Produce valid markdown output
    3. Use the articles titles and headings as a guide
    4. Try to present the most relevant information
    5. Extract all meaningful links from the text
+   6. Don't narrate the content e.g. 'The text says that the earth is round' but rather use the content itself e.g. 'The earth is round'
+   7. Don't use the word 'text' or 'content' in your summary
+   8. Don't try to emulate emotions or tone of the original content, always be neutral and objective
+   9. If the content is instructional repeat the instructions step by step e.g.:
+    - Step 1: Do this
+    - Step 2: Do that
+    - Step 3: Done
+   10. Mark proper nouns as bold e.g. **Harry Potter**
   
   Don't just summarize, cite the key information.
   
-  Text to analyze:\n${content}`;
+  Text to analyze:\n"${content}\n"`;
 
   const schema = {
     textual: {
