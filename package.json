@@ -5,12 +5,16 @@
   "bin": {
     "clai": "./dist/cli.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/schnullerpip/clai.git"
+  },
   "scripts": {
     "start": "bun run src/cli.ts",
     "build": "bun build ./src/index.ts --outdir dist --target node && bun build ./src/cli.ts --outdir dist --target node",
     "dev": "bun --watch src/cli.ts"
   },
-  "author": "",
+  "author": "schnullerpip (https://github.com/schnullerpip)",
   "license": "ISC",
   "description": "AI-powered webpage summarizer",
   "dependencies": {
