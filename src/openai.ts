@@ -6,7 +6,7 @@ const MAX_INPUT_TOKENS = 10000;
 function truncateContent(content: string): string {
   const maxChars = MAX_INPUT_TOKENS * 4;
   if (content.length <= maxChars) return content;
-  return content.slice(0, maxChars) + '... (content truncated)';
+  return content.slice(0, maxChars);
 }
 
 export interface StructuredResponse<T> {
@@ -53,8 +53,8 @@ class OpenAIWrapper {
   ): Promise<T> {
     const truncatedPrompt = truncateContent(prompt);
     const { 
-      model = 'gpt-3.5-turbo', 
-      temperature = 0.6,
+      model = 'gpt-4o-mini', 
+      temperature = 1.6,
       functionName = 'generate_response',
       responseSchema 
     } = options;
