@@ -79,9 +79,6 @@ async function getGoogleResults(query: string): Promise<string[]> {
     })
   );
 
-  console.log('queryWords', queryWords);
-  console.log('filteredUrls', filteredUrls);
-
   const results = [...filteredUrls].slice(0, 3);
   
   if (results.length === 0) {
