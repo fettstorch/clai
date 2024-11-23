@@ -1,7 +1,7 @@
 # Command Line AI Interface (CLAI)
 
 A tool for AI powered web search/scrape and summarization in the Terminal.
-Built for fun during a hack/jam in order to learn more about AI and CLIs.
+Built for fun in order to learn more about AI and CLIs.
 
 ## Installation
 
@@ -13,7 +13,7 @@ Install it locally in order to use the clai function in your project.
 ```bash
 npm install clai
 ```
-Using both the CLI tool and the clai function requires an OpenAI API key.
+Using both the CLI tool and the clai function requires an OpenAI API key. For the CLI tool make sure to set the `OPENAI_API_KEY` environment variable.
 
 ## OpenAI API Key Setup
 
