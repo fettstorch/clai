@@ -33,9 +33,9 @@ clai "how tall can giraffes get?"
 clai how tall can giraffes get
 clai
 ```
-<img width="300" src="https://github.com/user-attachments/assets/f4a81e24-ef5b-42b7-bca7-188763d4e5cf" />
+<img width="400" src="https://github.com/user-attachments/assets/002b3e05-5c77-4f4d-8aa3-ecb7412e9538" />
 
-The clie expects either a URL or a search query or no argument at all.
+The cli expects either a URL or a search query or no argument at all.
 When passing a search query without quotes make sure not to use any special characters, that might confuse the CLI e.g. ?
 
 ### Programmatic API
