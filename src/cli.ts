@@ -104,13 +104,13 @@ function formatMarkdownForTerminal(text: string): string {
 }
 
 async function analyzeInput(input: string, openAIKey: string) {
-  const spinner = ora('Analyzing content...').start();
+  const spinner = ora('Thinking...').start();
   
   try {
     const result = await clai(input, openAIKey);
-    spinner.succeed('Analysis complete');
+    spinner.succeed('AHA!');
     
-    console.log(chalk.green.bold('\n📝 Summary:'));
+    console.log(chalk.green.bold('\n📝 ═══ Summary ═══ :'));
     const formattedContent = formatMarkdownForTerminal(result.summary);
     await animateText(formattedContent);
     
