@@ -1,6 +1,6 @@
 {
   "name": "@fettstorch/clai",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "dist/index.js",
   "bin": {
     "clai": "dist/cli.js"

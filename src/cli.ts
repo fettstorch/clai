@@ -5,6 +5,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { clai } from './index';
 import { when } from '@fettstorch/jule';
+import pkg from '../package.json' assert { type: 'json' };
 
 const program = new Command();
 
@@ -13,7 +14,7 @@ async function main() {
     program
       .name('clai')
       .description('AI-powered web scraping tool')
-      .version('1.0.0')
+      .version(pkg.version)
       .argument('[input...]', 'URL or search terms to analyze')
       .action(async (inputs: string[]) => {
         const openAIKey = process.env.OPENAI_API_KEY;
