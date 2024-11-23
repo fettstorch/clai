@@ -41,6 +41,7 @@ export async function summarizeWebPage(content: string, openAIApiKey: string): P
     - Step 2: Do that
     - Step 3: Done
    10. Mark proper nouns as bold e.g. **Harry Potter**
+   11. Mark headings (h1, h2, h3) as #, ##, ### respectively
   
   Don't just summarize, cite the key information.
   

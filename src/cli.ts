@@ -4,6 +4,7 @@ import inquirer from 'inquirer';
 import chalk from 'chalk';
 import ora from 'ora';
 import { clai } from './index';
+import { when } from '@fettstorch/jule';
 
 const program = new Command();
 
@@ -88,7 +89,18 @@ async function animateText(text: string, delay = 25) {
 }
 
 function formatMarkdownForTerminal(text: string): string {
-  return text.replace(/\*\*(.*?)\*\*/g, (_, content) => chalk.bold(content));
+  // Handle headings first
+  const headingHandled = text.replace(/^(#{1,3})\s+(.*?)$/gm, (_, hashes, content) => when(hashes.length)({
+    1: () => `\n${chalk.yellow.bold('═══ ')}${chalk.yellow.bold(content)}${chalk.yellow.bold(' ═══')}`,
+    2: () => chalk.yellowBright.bold(content),
+    3: () => chalk.yellow(content),
+    else: () => content
+  }));
+  
+  // Handle regular bold text after headings
+  const boldHandled = headingHandled.replace(/\*\*(.*?)\*\*/g, (_, content) => chalk.bold(content));
+  
+  return boldHandled;
 }
 
 async function analyzeInput(input: string, openAIKey: string) {
