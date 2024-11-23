@@ -70,8 +70,10 @@ export async function summarizeWebPage(content: string, openAIApiKey: string): P
     }
   };
 
-  return openai.completeStructured<SummaryResult>(prompt, {
+  const result = await openai.completeStructured<SummaryResult>(prompt, {
     temperature: 0.3,
     responseSchema: schema
   });
+
+  return result;
 } 

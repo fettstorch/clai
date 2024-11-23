@@ -87,6 +87,10 @@ async function animateText(text: string, delay = 25) {
   process.stdout.write('\n');
 }
 
+function formatMarkdownForTerminal(text: string): string {
+  return text.replace(/\*\*(.*?)\*\*/g, (_, content) => chalk.bold(content));
+}
+
 async function analyzeInput(input: string, openAIKey: string) {
   const spinner = ora('Analyzing content...').start();
   
@@ -95,7 +99,8 @@ async function analyzeInput(input: string, openAIKey: string) {
     spinner.succeed('Analysis complete');
     
     console.log(chalk.green.bold('\n📝 Summary:'));
-    await animateText(result.summary);
+    const formattedContent = formatMarkdownForTerminal(result.summary);
+    await animateText(formattedContent);
     
     // Prompt user to select a link
     const { selectedLink } = await inquirer.prompt([

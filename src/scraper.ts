@@ -41,7 +41,12 @@ export async function scrape(input: string): Promise<ScrapedData[]> {
 // --- module private
 
 function isValidUrl(input: string): boolean {
-  return !input.includes(' ');
+  // Check for whitespace
+  if (input.includes(' ')) return false;
+  
+  // Check for common TLDs using regex
+  const tldPattern = /^[^\s]+\.[a-z]{2,}$/i;
+  return tldPattern.test(input);
 }
 
 function normalizeUrl(url: string): string {
@@ -73,6 +78,9 @@ async function getGoogleResults(query: string): Promise<string[]> {
              queryWords.some(word => urlLower.includes(word));
     })
   );
+
+  console.log('queryWords', queryWords);
+  console.log('filteredUrls', filteredUrls);
 
   const results = [...filteredUrls].slice(0, 3);
   
