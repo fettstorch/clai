@@ -1,38 +1,39 @@
 {
-  "name": "@fettstorch/clai",
-  "version": "0.1.6",
-  "main": "dist/index.js",
-  "bin": {
-    "clai": "dist/cli.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/schnullerpip/clai.git"
-  },
-  "scripts": {
-    "start": "bun run src/cli.ts",
-    "build": "bun build ./src/index.ts --outdir dist --target node && bun build ./src/cli.ts --outdir dist --target node",
-    "dev": "bun --watch src/cli.ts"
-  },
-  "author": "schnullerpip (https://github.com/schnullerpip)",
-  "license": "ISC",
-  "description": "AI-powered webpage summarizer",
-  "dependencies": {
-    "@fettstorch/jule": "^0.5.3",
-    "chalk": "^5.3.0",
-    "cheerio": "^1.0.0-rc.12",
-    "commander": "^12.1.0",
-    "inquirer": "^12.1.0",
-    "openai": "^4.73.0",
-    "ora": "^8.1.1",
-    "googleapis": "^126.0.1"
-  },
-  "devDependencies": {
-    "@types/inquirer": "^9.0.7",
-    "@types/node": "^20.11.19",
-    "bun-types": "latest"
-  },
-  "publishConfig": {
-    "access": "public"
-  }
+	"name": "@fettstorch/clai",
+	"version": "0.1.6",
+	"main": "dist/index.js",
+	"bin": {
+		"clai": "dist/cli.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/schnullerpip/clai.git"
+	},
+	"scripts": {
+		"start": "bun run src/cli.ts",
+		"build": "bun build ./src/index.ts --outdir dist --target node && bun build ./src/cli.ts --outdir dist --target node",
+		"dev": "bun --watch src/cli.ts"
+	},
+	"author": "schnullerpip (https://github.com/schnullerpip)",
+	"license": "ISC",
+	"description": "AI-powered webpage summarizer",
+	"dependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@fettstorch/jule": "^0.5.3",
+		"chalk": "^5.3.0",
+		"cheerio": "^1.0.0-rc.12",
+		"commander": "^12.1.0",
+		"googleapis": "^126.0.1",
+		"inquirer": "^12.1.0",
+		"openai": "^4.73.0",
+		"ora": "^8.1.1"
+	},
+	"devDependencies": {
+		"@types/inquirer": "^9.0.7",
+		"@types/node": "^20.11.19",
+		"bun-types": "latest"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
 }
