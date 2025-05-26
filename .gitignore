@@ -34,7 +34,6 @@ coverage/
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
-!.vscode/launch.json
 !.vscode/extensions.json
 
 # IDE - JetBrains
@@ -65,4 +64,5 @@ bun.lockb
 *~
 
 # Debug
-.debug/ 
+.debug/
+src/cliDebug.ts 
