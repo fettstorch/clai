@@ -268,6 +268,18 @@ async function getDuckDuckGoResults(query: string): Promise<string[]> {
 
   const data = await response.json();
 
+  // Check for DuckDuckGo blocking patterns
+  if (
+    data.Abstract?.includes("redirects users to a non-JavaScript site") ||
+    data.Abstract?.includes("DuckDuckGo redirects users") ||
+    data.AbstractText?.includes("redirects users to a non-JavaScript site") ||
+    data.AbstractText?.includes("DuckDuckGo redirects users")
+  ) {
+    throw new Error(
+      "DuckDuckGo blocked request - JavaScript disabled redirect"
+    );
+  }
+
   const urls: string[] = [];
 
   if (data.AbstractURL) {
