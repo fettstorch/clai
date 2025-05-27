@@ -9,12 +9,6 @@ function truncateContent(content: string): string {
   return content.slice(0, maxChars);
 }
 
-export interface StructuredResponse<T> {
-  function_call: {
-    arguments: string;
-  };
-}
-
 class OpenAIWrapper {
   private client: OpenAI;
 

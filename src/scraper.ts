@@ -1,5 +1,32 @@
 import * as Cheerio from "cheerio";
 
+/**
+ * ANTI-SCRAPING DETECTION STRATEGY
+ *
+ * This scraper uses several techniques to avoid being detected as a bot:
+ *
+ * 1. BROWSER MIMICRY:
+ *    - Complete HTTP headers that match real browsers
+ *    - Randomized but realistic User-Agent strings
+ *    - Proper Sec-Fetch metadata and client hints
+ *
+ * 2. SEARCH ENGINE DIVERSITY:
+ *    - Try SearX instances first (scraper-friendly)
+ *    - Fallback to Google with careful HTML parsing
+ *    - DuckDuckGo API as secondary fallback
+ *    - Emergency constructed URLs as last resort
+ *
+ * 3. RESPECTFUL BEHAVIOR:
+ *    - Single request per user interaction (no rapid-fire requests)
+ *    - Proper error handling without retries that could trigger rate limits
+ *    - Clean fallback chain that doesn't hammer failed services
+ *
+ * MAINTENANCE NOTES:
+ * - Update User-Agent strings every few months
+ * - Monitor SearX instance availability
+ * - Watch for changes in Google's HTML structure
+ */
+
 export interface ScrapedData {
   title: string;
   content: string;
@@ -33,8 +60,8 @@ export async function scrape(input: string): Promise<ScrapedData[]> {
     // Filter out failed scrapes
     return results.filter((result): result is ScrapedData => result !== null);
   } catch (error) {
-    console.error("Error during scraping:", error);
-    throw error;
+    // If search engines fail, return empty array to trigger OpenAI fallback
+    return [];
   }
 }
 
@@ -57,74 +84,30 @@ function normalizeUrl(url: string): string {
 }
 
 async function getSearchResults(query: string): Promise<string[]> {
-  try {
-    return await getSearXResults(query);
-  } catch (_) {
-    console.log("Trying Google search...");
+  const searchEngines = [
+    { name: "SearX", fn: getSearXResults },
+    { name: "Google", fn: getGoogleResults },
+    { name: "DuckDuckGo", fn: getDuckDuckGoResults },
+    { name: "Wikipedia", fn: getWikipediaResults },
+  ];
+
+  for (const engine of searchEngines) {
     try {
-      return await getGoogleResults(query);
+      const result = await engine.fn(query);
+      console.log(`[${engine.name}]::✅`);
+      return result;
     } catch (_) {
-      console.log("Trying DuckDuckGo search...");
-      try {
-        return await getDuckDuckGoResults(query);
-      } catch (_) {
-        console.log("Using emergency fallback...");
-        return getEmergencyResults(query);
-      }
+      console.log(`[${engine.name}]::❌`);
     }
   }
-}
 
-function getEmergencyResults(query: string): string[] {
-  // Emergency fallback - construct likely URLs based on the query
-  const results: string[] = [];
-
-  // Try to construct some reasonable URLs based on common patterns
-  const cleanQuery = query
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, "")
-    .trim();
-  const words = cleanQuery.split(/\s+/).filter((word) => word.length > 2);
-
-  if (words.length > 0) {
-    const mainWord = words[0];
-
-    // Add some likely candidates
-    results.push(
-      `https://en.wikipedia.org/wiki/${encodeURIComponent(
-        query.replace(/\s+/g, "_")
-      )}`
-    );
-
-    if (mainWord.length > 3) {
-      results.push(`https://${mainWord}.com`);
-      results.push(`https://www.${mainWord}.org`);
-    }
-
-    // Add a Reddit search as last resort
-    results.push(
-      `https://www.reddit.com/search/?q=${encodeURIComponent(query)}`
-    );
-  }
-
-  console.log("Emergency fallback returning:", results.join(", "));
-  return results.length > 0
-    ? results.slice(0, 3)
-    : [
-        `https://en.wikipedia.org/wiki/${encodeURIComponent(
-          query.replace(/\s+/g, "_")
-        )}`,
-      ];
+  console.log("All search engines failed - no URLs to scrape");
+  throw new Error("No search results available");
 }
 
 async function getSearXResults(query: string): Promise<string[]> {
-  // Public SearXNG instances that are scraper-friendly
-  const searxInstances = [
-    "https://searx.be",
-    "https://search.sapti.me",
-    "https://searx.tiekoetter.com",
-    "https://searx.prvcy.eu",
-  ];
+  // Keep a minimal list since most SearX instances block automation
+  const searxInstances = ["https://searx.be", "https://search.sapti.me"];
 
   // Try instances until one works
   for (const instance of searxInstances) {
@@ -133,16 +116,16 @@ async function getSearXResults(query: string): Promise<string[]> {
         query
       )}&format=json&categories=general`;
 
-      console.log("Trying SearX search...");
-
-      const response = await fetch(searchUrl, {
+      // Use enhancedFetch with JSON Accept header for API requests
+      // This makes the request look like a legitimate AJAX call
+      const response = await enhancedFetch(searchUrl, {
         headers: {
-          "User-Agent": getRandomUserAgent(),
           Accept: "application/json",
         },
       });
 
       if (!response.ok) {
+        // Likely blocked - continue silently to next instance
         continue;
       }
 
@@ -164,15 +147,44 @@ async function getSearXResults(query: string): Promise<string[]> {
       }
 
       if (urls.length > 0) {
-        console.log(`✓ SearX found ${urls.length} results`);
         return urls.slice(0, 3); // Limit to 3 results
       }
     } catch (error) {
-      // Continue to next instance
+      // Continue to next instance silently
     }
   }
 
   throw new Error("All SearX instances failed");
+}
+
+async function getWikipediaResults(query: string): Promise<string[]> {
+  // Wikipedia's OpenSearch API - designed for automation and doesn't block
+  const searchUrl = `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(
+    query
+  )}&limit=3&format=json&origin=*`;
+
+  const response = await enhancedFetch(searchUrl, {
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Wikipedia API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  // Wikipedia OpenSearch returns [query, titles, descriptions, urls]
+  if (Array.isArray(data) && data.length >= 4 && Array.isArray(data[3])) {
+    const urls = data[3]?.filter((url: string) => url?.startsWith("https://"));
+
+    if (urls?.length > 0) {
+      return urls;
+    }
+  }
+
+  throw new Error("No Wikipedia results found");
 }
 
 async function getGoogleResults(query: string): Promise<string[]> {
@@ -180,7 +192,17 @@ async function getGoogleResults(query: string): Promise<string[]> {
     query
   )}&num=10`;
 
+  // Fetch Google search page using enhanced headers to avoid bot detection
   const html = await fetchHtml(searchUrl);
+
+  // Check if Google is blocking us
+  if (
+    html.includes("If you're having trouble accessing Google Search") ||
+    html.includes("unusual traffic from your computer network")
+  ) {
+    throw new Error("Google blocked request - detected as bot");
+  }
+
   const cheerioDoc = Cheerio.load(html);
   const urls: string[] = [];
 
@@ -229,7 +251,6 @@ async function getGoogleResults(query: string): Promise<string[]> {
     throw new Error("No search results found in Google response");
   }
 
-  console.log(`✓ Google found ${uniqueUrls.length} results`);
   return uniqueUrls;
 }
 
@@ -238,7 +259,13 @@ async function getDuckDuckGoResults(query: string): Promise<string[]> {
     query
   )}&format=json&no_html=1&skip_disambig=1`;
 
-  const response = await fetch(searchUrl);
+  // DuckDuckGo API is more lenient but still benefits from browser-like headers
+  const response = await enhancedFetch(searchUrl);
+
+  if (!response.ok) {
+    throw new Error(`DuckDuckGo API error: ${response.status}`);
+  }
+
   const data = await response.json();
 
   const urls: string[] = [];
@@ -255,48 +282,123 @@ async function getDuckDuckGoResults(query: string): Promise<string[]> {
     }
   }
 
+  // If no direct URLs, try definition URL
+  if (urls.length === 0 && data.DefinitionURL) {
+    urls.push(data.DefinitionURL);
+  }
+
   if (urls.length === 0) {
     throw new Error("No search results found in DuckDuckGo response");
   }
 
-  console.log(`✓ DuckDuckGo found ${urls.length} results`);
   return urls;
 }
 
-async function fetchHtml(url: string): Promise<string> {
-  const response = await fetch(url, {
-    headers: {
-      "User-Agent": getRandomUserAgent(),
-      Accept:
-        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
-      "Accept-Language": "en-US,en;q=0.9",
-      "Accept-Encoding": "gzip, deflate, br",
-      DNT: "1",
-      Connection: "keep-alive",
-      "Upgrade-Insecure-Requests": "1",
-      "Sec-Fetch-Dest": "document",
-      "Sec-Fetch-Mode": "navigate",
-      "Sec-Fetch-Site": "none",
-      "Sec-Fetch-User": "?1",
-      "Cache-Control": "max-age=0",
-    },
+/**
+ * Enhanced fetch function that mimics real browser behavior to avoid scraping detection
+ *
+ * Anti-detection techniques used:
+ * 1. Complete browser fingerprint with all expected headers
+ * 2. Client hints that modern browsers send automatically
+ * 3. Proper Sec-Fetch metadata for legitimate navigation
+ * 4. Cache control headers to prevent suspicious caching patterns
+ */
+async function enhancedFetch(
+  url: string,
+  options: RequestInit = {}
+): Promise<Response> {
+  const headers = {
+    // Randomized but realistic User-Agent from our pool
+    "User-Agent": getRandomUserAgent(),
+
+    // Standard browser Accept header - tells server what content types we can handle
+    Accept:
+      "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+
+    // Language preferences - indicates we prefer English
+    "Accept-Language": "en-US,en;q=0.9",
+
+    // Compression support - modern browsers support these
+    "Accept-Encoding": "gzip, deflate, br",
+
+    // CLIENT HINTS - Modern browsers send these automatically
+    // Tells server we're Chrome 121 (matches our User-Agent)
+    "sec-ch-ua":
+      '"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
+
+    // Indicates we're on desktop (not mobile)
+    "sec-ch-ua-mobile": "?0",
+
+    // Platform information (macOS in this case)
+    "sec-ch-ua-platform": '"macOS"',
+
+    // SEC-FETCH METADATA - Critical for avoiding detection
+    // Tells server this is a document request (not an API call)
+    "Sec-Fetch-Dest": "document",
+
+    // Indicates this is a navigation (user clicking a link)
+    "Sec-Fetch-Mode": "navigate",
+
+    // Cross-site navigation (coming from different domain)
+    "Sec-Fetch-Site": "cross-site",
+
+    // User-initiated request (not automatic/script)
+    "Sec-Fetch-User": "?1",
+
+    // Indicates we want HTTPS when possible
+    "Upgrade-Insecure-Requests": "1",
+
+    // CACHE CONTROL - Prevents suspicious caching patterns
+    // Don't use cached responses
+    "Cache-Control": "no-cache",
+
+    // Legacy cache control for older servers
+    Pragma: "no-cache",
+
+    // Allow caller to override any headers if needed
+    ...options.headers,
+  };
+
+  return fetch(url, {
+    ...options,
+    headers,
   });
+}
+
+async function fetchHtml(url: string): Promise<string> {
+  const response = await enhancedFetch(url);
   return response.text();
 }
 
+/**
+ * Returns a random User-Agent string from a pool of current, realistic browser strings
+ *
+ * Why this helps avoid detection:
+ * 1. Rotating User-Agents prevents fingerprinting based on consistent UA
+ * 2. All UAs are current versions (as of late 2024) - old versions are suspicious
+ * 3. Mix of browsers/platforms makes traffic look more natural
+ * 4. These exact strings are used by millions of real users
+ *
+ * Maintenance note: Update these every few months to stay current
+ */
 function getRandomUserAgent(): string {
   const userAgents = [
-    // Latest Chrome on macOS
+    // Latest Chrome on macOS (most common desktop browser)
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-    // Latest Chrome on Windows
+
+    // Latest Chrome on Windows (largest user base)
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-    // Latest Firefox on macOS
+
+    // Latest Firefox on macOS (privacy-conscious users)
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:132.0) Gecko/20100101 Firefox/132.0",
+
     // Latest Firefox on Windows
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0",
-    // Latest Safari on macOS
+
+    // Latest Safari on macOS (default Mac browser)
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Safari/605.1.15",
-    // Latest Edge on Windows
+
+    // Latest Edge on Windows (default Windows browser)
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
   ];
 

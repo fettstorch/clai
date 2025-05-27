@@ -1,13 +1,13 @@
-import { scrape } from './scraper'
-import { summarizeWebPage as summarize } from './summarizer'
+import { scrape } from "./scraper";
+import { summarizeWebPage as summarize, summarizeQuery } from "./summarizer";
 
 export interface SummaryOutput {
-	summary: string
-	links: ReadonlyArray<{
-		name: string
-		url: string
-	}>
-	sources: string[]
+  summary: string;
+  links: ReadonlyArray<{
+    name: string;
+    url: string;
+  }>;
+  sources: string[];
 }
 
 /**
@@ -25,24 +25,47 @@ export interface SummaryOutput {
  * ```
  */
 export async function clai(
-	input: string,
-	openAIKey: string,
+  input: string,
+  openAIKey: string
 ): Promise<SummaryOutput> {
-	const scrapedData = await scrape(input)
+  const scrapedData = await scrape(input);
 
-	// Combine all content with source attribution
-	const combinedContent = scrapedData
-		.map((data) => `Content from ${data.url}:\n${data.content}`)
-		.join('\n\n')
+  // Check if we have useful scraped data (not just error pages)
+  const usefulData = scrapedData.filter(
+    (data) =>
+      data.content.length > 200 &&
+      !data.content.includes("Wikipedia does not have an article") &&
+      !data.content.includes("page not found") &&
+      !data.content.includes("404") &&
+      !data.content.includes("error")
+  );
 
-	const result = await summarize(combinedContent, openAIKey)
+  // If we have useful scraped data, use it
+  if (usefulData.length > 0) {
+    // Combine all useful content with source attribution
+    const combinedContent = usefulData
+      .map((data) => `Content from ${data.url}:\n${data.content}`)
+      .join("\n\n");
 
-	return {
-		summary: result.textual.trim(),
-		links: result.links,
-		sources: scrapedData.map((data) => data.url),
-	}
+    const result = await summarize(combinedContent, openAIKey);
+
+    return {
+      summary: result.textual.trim(),
+      links: result.links,
+      sources: usefulData.map((data) => data.url),
+    };
+  }
+
+  // If no scraped data available, use OpenAI directly with the query
+  console.log("No scraped data available - using OpenAI directly for query...");
+  const result = await summarizeQuery(input, openAIKey);
+
+  return {
+    summary: result.textual.trim(),
+    links: result.links,
+    sources: ["OpenAI Knowledge Base"],
+  };
 }
 
 // Default export for easier importing
-export default clai
+export default clai;
