@@ -37,6 +37,10 @@ async function main() {
               name: "input",
               message: "Enter a URL or search query:",
               validate: (input) => input.length > 0,
+              prefix: String.fromCodePoint(0x003F), // ?
+              theme: {
+                prefix: String.fromCodePoint(0x003F) // ?
+              }
             },
           ]);
           input = answers.input;
@@ -162,6 +166,10 @@ async function analyzeInput(input: string, openAIKey: string) {
           })),
           { name: "Exit", value: "exit" },
         ],
+        prefix: String.fromCodePoint(0x003F), // ?
+        theme: {
+          prefix: String.fromCodePoint(0x003F) // ?
+        }
       },
     ]);
 
@@ -172,6 +180,10 @@ async function analyzeInput(input: string, openAIKey: string) {
           name: "input",
           message: "Enter a URL or search query:",
           validate: (input) => input.length > 0,
+          prefix: String.fromCodePoint(0x003F), // ?
+          theme: {
+            prefix: String.fromCodePoint(0x003F) // ?
+          }
         },
       ]);
       await analyzeInput(newInput, openAIKey);
