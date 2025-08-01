@@ -47,7 +47,6 @@ const { summary, links, sources } = await clai('https://example.com', 'your-open
 
 ## Issues
 - Needs a better prompt in order to more reliably stop narrating a page's content and rather cite it in a more concise manner.
-- The first answer's stream animation appears to sometimes not be skippable using 'enter'
 - large sites might surpass the token limit (currently not handled gracefully)
 - occasionally clai doesn't find search results (this is not handled gracefully)
 
