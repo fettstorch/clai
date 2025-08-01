@@ -69,6 +69,10 @@ async function animateText(text: string, delay = 25) {
   process.stdin.setRawMode(true);
   process.stdin.resume();
 
+  // Small delay to ensure stdin is ready for keypress capture
+  // This fixes the issue where the first animation can't be interrupted
+  await new Promise(resolve => setTimeout(resolve, 50));
+
   let currentIndex = 0;
   while (currentIndex < text.length) {
     if (shouldComplete) {
