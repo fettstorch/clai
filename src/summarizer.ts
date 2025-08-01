@@ -1,12 +1,12 @@
-import { openaiClient } from "./openai";
+import { openaiClient } from './openai'
 
 export type SummaryResult = Readonly<{
-  textual: string;
-  links: ReadonlyArray<{
-    name: string;
-    url: string;
-  }>;
-}>;
+	textual: string
+	links: ReadonlyArray<{
+		name: string
+		url: string
+	}>
+}>
 
 /**
  * Summarizes content and extracts relevant links using OpenAI
@@ -24,12 +24,12 @@ export type SummaryResult = Readonly<{
  */
 
 export async function summarizeWebPage(
-  content: string,
-  openAIApiKey: string
+	content: string,
+	openAIApiKey: string,
 ): Promise<SummaryResult> {
-  const openai = openaiClient(openAIApiKey);
+	const openai = openaiClient(openAIApiKey)
 
-  const prompt = `Your are an expert educator. Analyze the following text and create a
+	const prompt = `Your are an expert educator. Analyze the following text and create a
   concise summary with the following guidelines:
    1. Always use bullet points, lists and tables over paragraphs.
    2. Produce valid markdown output
@@ -48,38 +48,38 @@ export async function summarizeWebPage(
   
   Don't just summarize, cite the key information.
   
-  Text to analyze:\n"${content}\n"`;
+  Text to analyze:\n"${content}\n"`
 
-  const schema = {
-    textual: {
-      type: "string",
-      description: "Concise summary of the text",
-    },
-    links: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          name: {
-            type: "string",
-            description: "Descriptive name or title of the link",
-          },
-          url: {
-            type: "string",
-            description: "The URL of the link",
-          },
-        },
-        required: ["name", "url"],
-      },
-    },
-  };
+	const schema = {
+		textual: {
+			type: 'string',
+			description: 'Concise summary of the text',
+		},
+		links: {
+			type: 'array',
+			items: {
+				type: 'object',
+				properties: {
+					name: {
+						type: 'string',
+						description: 'Descriptive name or title of the link',
+					},
+					url: {
+						type: 'string',
+						description: 'The URL of the link',
+					},
+				},
+				required: ['name', 'url'],
+			},
+		},
+	}
 
-  const result = await openai.completeStructured<SummaryResult>(prompt, {
-    temperature: 0.3,
-    responseSchema: schema,
-  });
+	const result = await openai.completeStructured<SummaryResult>(prompt, {
+		temperature: 0.3,
+		responseSchema: schema,
+	})
 
-  return result;
+	return result
 }
 
 /**
@@ -89,12 +89,12 @@ export async function summarizeWebPage(
  * @returns Promise containing the AI-generated response and any relevant links
  */
 export async function summarizeQuery(
-  query: string,
-  openAIApiKey: string
+	query: string,
+	openAIApiKey: string,
 ): Promise<SummaryResult> {
-  const openai = openaiClient(openAIApiKey);
+	const openai = openaiClient(openAIApiKey)
 
-  const prompt = `You are an expert educator and researcher. Answer the following query with accurate, helpful information:
+	const prompt = `You are an expert educator and researcher. Answer the following query with accurate, helpful information:
 
 "${query}"
 
@@ -109,36 +109,36 @@ Guidelines:
 8. Use appropriate headings (##, ###) to structure your response
 9. If the query is about current events beyond your knowledge cutoff, mention that limitation
 
-Provide a thorough, educational response that directly addresses the user's query.`;
+Provide a thorough, educational response that directly addresses the user's query.`
 
-  const schema = {
-    textual: {
-      type: "string",
-      description: "Comprehensive answer to the user query",
-    },
-    links: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          name: {
-            type: "string",
-            description: "Descriptive name of the recommended resource",
-          },
-          url: {
-            type: "string",
-            description: "URL to the recommended resource",
-          },
-        },
-        required: ["name", "url"],
-      },
-    },
-  };
+	const schema = {
+		textual: {
+			type: 'string',
+			description: 'Comprehensive answer to the user query',
+		},
+		links: {
+			type: 'array',
+			items: {
+				type: 'object',
+				properties: {
+					name: {
+						type: 'string',
+						description: 'Descriptive name of the recommended resource',
+					},
+					url: {
+						type: 'string',
+						description: 'URL to the recommended resource',
+					},
+				},
+				required: ['name', 'url'],
+			},
+		},
+	}
 
-  const result = await openai.completeStructured<SummaryResult>(prompt, {
-    temperature: 0.7,
-    responseSchema: schema,
-  });
+	const result = await openai.completeStructured<SummaryResult>(prompt, {
+		temperature: 0.7,
+		responseSchema: schema,
+	})
 
-  return result;
+	return result
 }

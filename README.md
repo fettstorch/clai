@@ -1,6 +1,6 @@
 # Command Line AI Interface (CLAI)
 
-A tool for AI powered web search/scrape and summarization in the Terminal.
+An AI-powered question answering tool for the terminal. Get instant answers to your questions using OpenAI, with optional web crawling capabilities.
 Built for fun in order to learn more about AI and CLIs.
 
 ## Installation
@@ -26,29 +26,45 @@ Using both the CLI tool and the clai function requires an OpenAI API key. For th
 
 
 ## Features
-### CLI Usage
+
+### Default Behavior - Direct AI Answering
+By default, CLAI uses OpenAI directly to answer your questions without web crawling:
+
 ```bash
-clai https://example.com
 clai "how tall can giraffes get?"
 clai how tall can giraffes get
+clai "explain quantum computing"
 clai
 ```
+
+### Optional Web Crawling
+Use the `-c` or `--crawl` flag to enable web scraping and search engine functionality:
+
+```bash
+clai -c "latest news about AI"
+clai --crawl https://example.com
+clai -c "current Bitcoin price"
+```
+
 <img width="400" src="https://github.com/user-attachments/assets/002b3e05-5c77-4f4d-8aa3-ecb7412e9538" />
 
-The cli expects either a URL or a search query or no argument at all.
-When passing a search query without quotes make sure not to use any special characters, that might confuse the CLI e.g. ?
+The CLI accepts questions, search queries, or URLs. When passing queries without quotes, avoid special characters that might confuse the CLI (e.g., `?`).
 
 ### Programmatic API
 ```ts
 import clai from 'clai';
 
-const { summary, links, sources } = await clai('https://example.com', 'your-openai-api-key');
+// Direct AI answering (default)
+const { summary, links, sources } = await clai('how tall can giraffes get?', 'your-openai-api-key');
+
+// With web crawling enabled
+const { summary, links, sources } = await clai('https://example.com', 'your-openai-api-key', true);
 ```
 
 ## Issues
-- Needs a better prompt in order to more reliably stop narrating a page's content and rather cite it in a more concise manner.
-- large sites might surpass the token limit (currently not handled gracefully)
-- occasionally clai doesn't find search results (this is not handled gracefully)
+- When using web crawling (`-c` flag): search engines often fail due to scraping protections
+- When using web crawling (`-c` flag): large sites might surpass the token limit (currently not handled gracefully)
+- Web crawling results may not always fit the user's query well
 
 ## License
 
