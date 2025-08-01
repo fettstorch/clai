@@ -122,7 +122,22 @@ function formatMarkdownForTerminal(text: string): string {
 }
 
 async function analyzeInput(input: string, openAIKey: string) {
-  const spinner = ora("Thinking...").start();
+  const spinner = ora({
+    text: "Thinking...",
+    spinner: {
+      frames: [
+        String.fromCodePoint(0x2819), // ⠙
+        String.fromCodePoint(0x2839), // ⠹
+        String.fromCodePoint(0x2838), // ⠸
+        String.fromCodePoint(0x2826), // ⠦
+        String.fromCodePoint(0x2807), // ⠧
+        String.fromCodePoint(0x280F), // ⠏
+        String.fromCodePoint(0x281F), // ⠟
+        String.fromCodePoint(0x283F), // ⠿
+      ],
+      interval: 80
+    }
+  }).start();
 
   try {
     const result = await clai(input, openAIKey);

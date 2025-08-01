@@ -94,10 +94,10 @@ async function getSearchResults(query: string): Promise<string[]> {
   for (const engine of searchEngines) {
     try {
       const result = await engine.fn(query);
-      console.log(`[${engine.name}]::✅`);
+      console.log(`[${engine.name}]::${String.fromCodePoint(0x2705)}`);
       return result;
     } catch (_) {
-      console.log(`[${engine.name}]::❌`);
+      console.log(`[${engine.name}]::${String.fromCodePoint(0x274C)}`);
     }
   }
 
