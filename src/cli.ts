@@ -168,7 +168,8 @@ async function analyzeInput(input: string, openAIKey: string) {
         ],
         prefix: String.fromCodePoint(0x003F), // ?
         theme: {
-          prefix: String.fromCodePoint(0x003F) // ?
+          prefix: String.fromCodePoint(0x003F), // ?
+          pointer: String.fromCodePoint(0x003E), // >
         }
       },
     ]);
