@@ -23,7 +23,7 @@ async function main() {
 
         if (!openAIKey) {
           console.error(
-            chalk.red("❌ OPENAI_API_KEY environment variable is not set")
+            chalk.red(`${String.fromCodePoint(0x274c)} OPENAI_API_KEY environment variable is not set`)
           );
           process.exit(1);
         }
@@ -141,9 +141,10 @@ async function analyzeInput(input: string, openAIKey: string) {
 
   try {
     const result = await clai(input, openAIKey);
-    spinner.succeed("AHA!");
+    spinner.stop();
+    console.log(`${String.fromCodePoint(0x2705)} AHA!`);
 
-    console.log(chalk.green.bold("\n📝 ═══ Summary ═══ :"));
+    console.log(chalk.green.bold(`\n${String.fromCodePoint(0x1f4dd)} ═══ Summary ═══ :`));
     const formattedContent = formatMarkdownForTerminal(result.summary);
     await animateText(formattedContent);
 
@@ -154,7 +155,7 @@ async function analyzeInput(input: string, openAIKey: string) {
         name: "selectedLink",
         message: "\n\nWhat now?:",
         choices: [
-          { name: chalk.yellow("🔍 New search"), value: "new" },
+          { name: chalk.yellow(`${String.fromCodePoint(0x1f50d)} New search`), value: "new" },
           ...result.links.map((link) => ({
             name: `${chalk.bold(link.name)}: ${chalk.cyan(link.url)}`,
             value: link.url,
@@ -178,7 +179,8 @@ async function analyzeInput(input: string, openAIKey: string) {
       await analyzeInput(selectedLink, openAIKey);
     }
   } catch (error) {
-    spinner?.fail("Analysis failed");
+    spinner?.stop();
+    console.log(`${String.fromCodePoint(0x274c)} Analysis failed`);
     console.error(chalk.red("Error:"), error);
   }
 }
